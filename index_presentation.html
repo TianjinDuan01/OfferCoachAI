@@ -1,0 +1,2535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OfferCoach AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* ── RESET & BASE ─────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:   #0F1B35;
+  --blue:   #2563EB;
+  --blue2:  #3B82F6;
+  --indigo: #4F46E5;
+  --purp:   #7C3AED;
+  --purp-l: #EDE9FE;
+  --blue-l: #EFF6FF;
+  --slate:  #64748B;
+  --text:   #1E293B;
+  --muted:  #94A3B8;
+  --border: #E2E8F0;
+  --bg:     #F8FAFC;
+  --white:  #FFFFFF;
+  --green:  #10B981;
+  --amber:  #F59E0B;
+  --red:    #EF4444;
+  --radius: 14px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg: 0 8px 32px rgba(15,27,53,.12);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── SCREENS ──────────────────────────────────────────────────────────── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: block; }
+
+/* ── NAV ──────────────────────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700; font-size: 18px;
+  color: var(--navy);
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer;
+}
+.nav-logo span { color: var(--blue); }
+.logo-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--purp));
+}
+.nav-steps {
+  display: flex; align-items: center; gap: 4px;
+}
+.nav-step {
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+  color: var(--muted); cursor: pointer;
+  transition: all .2s;
+}
+.nav-step.active {
+  background: var(--blue-l); color: var(--blue);
+}
+.nav-step:hover { color: var(--blue); }
+.nav-step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--border); color: var(--slate);
+  font-size: 11px; font-weight: 600; margin-right: 5px;
+}
+.nav-step.active .nav-step-num {
+  background: var(--blue); color: white;
+}
+
+/* ── BUTTONS ──────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px; border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 500;
+  cursor: pointer; border: none;
+  transition: all .2s; text-decoration: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--blue), var(--indigo));
+  color: white;
+  box-shadow: 0 4px 14px rgba(37,99,235,.35);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.4); }
+.btn-secondary {
+  background: white; color: var(--blue);
+  border: 1.5px solid var(--blue2);
+}
+.btn-secondary:hover { background: var(--blue-l); }
+.btn-ghost { background: transparent; color: var(--slate); }
+.btn-ghost:hover { background: var(--bg); }
+.btn-lg { padding: 14px 28px; font-size: 15px; border-radius: 12px; }
+.btn-sm { padding: 7px 14px; font-size: 13px; border-radius: 8px; }
+
+/* ── CARDS ────────────────────────────────────────────────────────────── */
+.card {
+  background: white; border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.card-header {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600; font-size: 13px;
+  color: var(--slate); letter-spacing: .04em;
+  text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 7px;
+}
+.card-header .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCREEN 1 — LANDING
+══════════════════════════════════════════════════════════════════════ */
+#screen-landing {
+  background: white;
+}
+
+.hero {
+  padding: 80px 40px 60px;
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--purp-l); color: var(--purp);
+  padding: 5px 13px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.hero-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 46px; font-weight: 700; line-height: 1.12;
+  color: var(--navy); margin-bottom: 16px;
+}
+.hero-title .accent { color: var(--blue); }
+.hero-tagline {
+  font-size: 18px; color: var(--slate); margin-bottom: 28px; line-height: 1.5;
+}
+.hero-sub {
+  font-size: 14px; color: var(--muted); margin-bottom: 32px; line-height: 1.7;
+  padding: 16px; background: var(--bg); border-radius: 10px;
+  border-left: 3px solid var(--blue);
+}
+.hero-sub strong { color: var(--text); }
+.hero-ctas { display: flex; gap: 12px; align-items: center; }
+.hero-visual {
+  background: linear-gradient(145deg, #EFF6FF, #EDE9FE);
+  border-radius: 20px; padding: 28px;
+  box-shadow: var(--shadow-lg);
+}
+.mini-chat {
+  background: white; border-radius: 12px; padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+.mini-chat-header {
+  font-family: 'Sora', sans-serif;
+  font-size: 12px; font-weight: 600; color: var(--slate);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+.mini-msg {
+  padding: 9px 13px; border-radius: 10px;
+  font-size: 13px; line-height: 1.5; margin-bottom: 8px;
+}
+.mini-msg.ai { background: var(--blue-l); color: var(--navy); }
+.mini-msg.user { background: var(--bg); color: var(--text); }
+.mini-scores {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;
+}
+.mini-score-item {
+  background: var(--bg); border-radius: 8px; padding: 8px 10px;
+}
+.mini-score-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+.mini-score-bar {
+  height: 5px; background: var(--border); border-radius: 3px; overflow: hidden;
+}
+.mini-score-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--indigo));
+}
+.mini-score-val { font-size: 12px; font-weight: 600; color: var(--blue); margin-top: 3px; }
+
+.features-section {
+  padding: 60px 40px;
+  max-width: 1100px; margin: 0 auto;
+}
+.section-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 28px; font-weight: 700; color: var(--navy);
+  margin-bottom: 8px; text-align: center;
+}
+.section-sub {
+  color: var(--slate); text-align: center; margin-bottom: 40px;
+}
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+.feature-card {
+  background: white; border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 24px; transition: all .25s;
+}
+.feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--blue2);
+}
+.feature-icon {
+  width: 42px; height: 42px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 14px;
+}
+.feature-name {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600; font-size: 15px; color: var(--navy); margin-bottom: 6px;
+}
+.feature-desc { font-size: 13px; color: var(--slate); line-height: 1.6; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCREEN 2 — SESSION SETUP
+══════════════════════════════════════════════════════════════════════ */
+#screen-setup {
+  background: var(--bg);
+}
+.setup-layout {
+  max-width: 1000px; margin: 0 auto; padding: 40px;
+  display: grid; grid-template-columns: 1fr 360px; gap: 28px;
+}
+.page-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 24px; font-weight: 700; color: var(--navy);
+  margin-bottom: 6px;
+}
+.page-sub { color: var(--slate); font-size: 14px; margin-bottom: 24px; }
+
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block; font-size: 13px; font-weight: 500;
+  color: var(--text); margin-bottom: 7px;
+}
+.form-input, .form-textarea {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+  background: white; outline: none; transition: border .2s;
+  resize: none;
+}
+.form-input:focus, .form-textarea:focus { border-color: var(--blue); }
+.form-textarea { height: 160px; line-height: 1.6; }
+.upload-area {
+  border: 2px dashed var(--border); border-radius: 10px;
+  padding: 24px; text-align: center;
+  background: white; color: var(--muted); font-size: 13px;
+  cursor: pointer; transition: all .2s;
+}
+.upload-area:hover { border-color: var(--blue2); color: var(--blue); }
+.upload-icon { font-size: 28px; margin-bottom: 8px; }
+
+/* CompanyDNA panel */
+.dna-panel {
+  background: linear-gradient(135deg, #EFF6FF, #EDE9FE);
+  border: 1.5px solid #C7D2FE; border-radius: var(--radius);
+  padding: 20px; margin-bottom: 18px;
+}
+.dna-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.dna-badge {
+  background: var(--indigo); color: white;
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  padding: 3px 10px; border-radius: 20px;
+}
+.dna-title {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600; font-size: 14px; color: var(--navy);
+}
+.dna-tier {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.dna-tier-badge {
+  font-size: 12px; font-weight: 700;
+  background: white; padding: 4px 12px; border-radius: 20px;
+  color: var(--indigo); border: 1.5px solid #C7D2FE;
+}
+.confidence-bar-wrap { margin-bottom: 12px; }
+.confidence-label {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--slate); margin-bottom: 5px;
+}
+.confidence-val { font-weight: 600; color: var(--indigo); }
+.confidence-bar {
+  height: 7px; background: white; border-radius: 4px; overflow: hidden;
+}
+.confidence-fill {
+  height: 100%; width: 78%;
+  background: linear-gradient(90deg, var(--blue), var(--purp));
+  border-radius: 4px;
+}
+.dna-reason {
+  font-size: 12px; color: var(--slate); line-height: 1.6;
+  background: white; border-radius: 8px; padding: 10px 12px;
+  border-left: 3px solid var(--indigo);
+}
+
+.keywords-panel { margin-bottom: 18px; }
+.kw-title {
+  font-size: 12px; font-weight: 600; color: var(--slate);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
+}
+.kw-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.kw-tag {
+  background: var(--blue-l); color: var(--blue);
+  font-size: 12px; font-weight: 500;
+  padding: 4px 11px; border-radius: 20px;
+  border: 1px solid #BFDBFE;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCREEN 3 — COACHING CHAT
+══════════════════════════════════════════════════════════════════════ */
+#screen-chat {
+  background: var(--bg);
+}
+.chat-layout {
+  display: grid; grid-template-columns: 1fr 380px;
+  height: calc(100vh - 60px);
+}
+
+/* Left: Chat */
+.chat-main {
+  display: flex; flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: white;
+  overflow: hidden;
+  min-height: 0;
+  height: 100%;
+}
+.chat-topbar {
+  padding: 16px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.chat-session-info { display: flex; align-items: center; gap: 10px; }
+.chat-session-badge {
+  background: var(--blue-l); color: var(--blue);
+  font-size: 12px; font-weight: 600; padding: 4px 11px; border-radius: 20px;
+}
+.chat-session-name {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600; font-size: 14px; color: var(--navy);
+}
+.q-counter {
+  font-size: 12px; color: var(--muted);
+}
+.q-dots { display: flex; gap: 5px; }
+.q-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border); transition: background .3s;
+}
+.q-dot.done { background: var(--green); }
+.q-dot.active { background: var(--blue); }
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 20px 24px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.msg { display: flex; gap: 10px; align-items: flex-start; }
+.msg.user { flex-direction: row-reverse; }
+.msg-avatar {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+}
+.msg-avatar.ai {
+  background: linear-gradient(135deg, var(--blue), var(--indigo));
+  color: white;
+}
+.msg-avatar.user {
+  background: linear-gradient(135deg, var(--green), #059669);
+  color: white; font-size: 12px;
+}
+.msg-bubble {
+  max-width: 80%; padding: 12px 16px; border-radius: 14px;
+  font-size: 14px; line-height: 1.6;
+}
+.msg.ai .msg-bubble {
+  background: var(--bg); border: 1px solid var(--border);
+  border-top-left-radius: 4px; color: var(--text);
+}
+.msg.user .msg-bubble {
+  background: linear-gradient(135deg, var(--blue), var(--indigo));
+  color: white; border-top-right-radius: 4px;
+}
+.msg-label {
+  font-size: 11px; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.msg.ai .msg-label { color: var(--blue); }
+.msg.user .msg-label { color: rgba(255,255,255,.7); text-align: right; }
+
+.chat-q-pills {
+  padding: 12px 24px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; overflow-x: auto; flex-shrink: 0;
+}
+.q-pill {
+  flex-shrink: 0; padding: 6px 13px; border-radius: 20px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  border: 1.5px solid var(--border); color: var(--slate);
+  background: white; transition: all .2s; white-space: nowrap;
+}
+.q-pill.active {
+  border-color: var(--blue); color: var(--blue); background: var(--blue-l);
+}
+.q-pill:hover { border-color: var(--blue2); color: var(--blue); }
+
+.chat-input-area {
+  padding: 16px 24px; border-top: 1px solid var(--border);
+  display: flex; gap: 10px; align-items: flex-end;
+  background: white; flex-shrink: 0;
+}
+.chat-textarea {
+  flex: 1; padding: 11px 14px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--bg);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+  resize: none; outline: none; height: 80px; line-height: 1.5;
+  transition: border .2s;
+}
+.chat-textarea:focus { border-color: var(--blue); background: white; }
+.send-btn {
+  padding: 10px 18px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--blue), var(--indigo));
+  color: white; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; gap: 6px;
+  transition: all .2s; align-self: flex-end;
+}
+.send-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,.35); }
+.send-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+/* Right: Dashboard */
+.chat-dashboard {
+  overflow-y: auto; padding: 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  background: var(--bg);
+  height: 100%;
+  min-height: 0;
+}
+
+/* Score panel */
+.score-panel { }
+.score-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.score-name { font-size: 13px; font-weight: 500; color: var(--text); width: 110px; flex-shrink: 0; }
+.score-bar-wrap { flex: 1; }
+.score-bar {
+  height: 7px; background: var(--border); border-radius: 4px; overflow: hidden;
+}
+.score-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--blue), var(--indigo));
+  transition: width .6s cubic-bezier(.25,.46,.45,.94);
+}
+.score-val { font-size: 13px; font-weight: 700; color: var(--blue); width: 30px; text-align: right; }
+
+/* STAR panel */
+.star-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.star-item {
+  padding: 10px 12px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: white;
+  display: flex; align-items: center; gap: 8px;
+}
+.star-letter {
+  font-family: 'Sora', sans-serif;
+  font-size: 18px; font-weight: 700; width: 24px;
+}
+.star-info { flex: 1; }
+.star-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.star-status { font-size: 11px; }
+.star-item.detected { border-color: #A7F3D0; background: #F0FDF4; }
+.star-item.detected .star-letter { color: var(--green); }
+.star-item.detected .star-status { color: var(--green); }
+.star-item.weak { border-color: #FDE68A; background: #FFFBEB; }
+.star-item.weak .star-letter { color: var(--amber); }
+.star-item.weak .star-status { color: var(--amber); }
+.star-item.missing { border-color: #FCA5A5; background: #FEF2F2; }
+.star-item.missing .star-letter { color: var(--red); }
+.star-item.missing .star-status { color: var(--red); }
+
+/* Suggestion panel */
+.suggestion-box {
+  background: linear-gradient(135deg, #EFF6FF, #EDE9FE);
+  border: 1.5px solid #C7D2FE; border-radius: var(--radius);
+  padding: 16px;
+}
+.suggestion-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--indigo);
+  margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+}
+.suggestion-text { font-size: 13px; color: var(--navy); line-height: 1.65; }
+
+.framework-box {
+  background: white; border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden;
+}
+.framework-header {
+  padding: 10px 14px; background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; font-weight: 600; color: var(--slate);
+  text-transform: uppercase; letter-spacing: .05em;
+}
+.framework-body { padding: 14px; }
+.framework-item {
+  display: flex; gap: 10px; margin-bottom: 10px;
+  font-size: 13px; line-height: 1.55;
+}
+.framework-item:last-child { margin-bottom: 0; }
+.fw-letter {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700; font-size: 13px;
+  width: 22px; flex-shrink: 0; color: var(--indigo);
+}
+.fw-text { color: var(--text); }
+
+/* Thinking indicator */
+.thinking {
+  display: none; align-items: center; gap: 8px;
+  padding: 10px 14px; background: var(--bg); border-radius: 10px;
+  font-size: 13px; color: var(--muted);
+}
+.thinking.active { display: flex; }
+.thinking-dots { display: flex; gap: 4px; }
+.thinking-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--blue); opacity: .4;
+  animation: pulse 1.2s infinite;
+}
+.thinking-dot:nth-child(2) { animation-delay: .2s; }
+.thinking-dot:nth-child(3) { animation-delay: .4s; }
+@keyframes pulse {
+  0%, 100% { opacity: .4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCREEN 4 — RADAR REPORT
+══════════════════════════════════════════════════════════════════════ */
+#screen-chat {
+  overflow: hidden;
+  height: calc(100vh - 60px);
+}
+#screen-report {
+  background: var(--bg);
+}
+.report-layout {
+  max-width: 1100px; margin: 0 auto; padding: 40px;
+  display: grid; grid-template-columns: 1fr 340px; gap: 28px;
+}
+.radar-card { text-align: center; }
+.radar-wrap { position: relative; max-width: 320px; margin: 0 auto 16px; }
+.radar-legend {
+  display: flex; justify-content: center; gap: 16px; margin-bottom: 12px;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--slate); }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+.improvement-list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+.improvement-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: 13px; line-height: 1.5;
+}
+.improvement-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--blue); color: white;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.next-practice {
+  background: linear-gradient(135deg, var(--blue), var(--indigo));
+  border-radius: 12px; padding: 18px; color: white; margin-top: 16px;
+}
+.next-practice-label {
+  font-size: 11px; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; opacity: .7; margin-bottom: 6px;
+}
+.next-practice-text { font-size: 14px; font-weight: 500; line-height: 1.5; }
+
+.sessions-col { display: flex; flex-direction: column; gap: 14px; }
+.session-card {
+  background: white; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px; cursor: pointer; transition: all .2s;
+}
+.session-card:hover { border-color: var(--blue2); box-shadow: var(--shadow); }
+.session-card.current { border-color: var(--blue); border-width: 2px; }
+.session-num {
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px;
+}
+.session-name {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600; font-size: 14px; color: var(--navy); margin-bottom: 10px;
+}
+.session-scores {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5px;
+}
+.ss-item { font-size: 12px; color: var(--slate); }
+.ss-val { font-weight: 600; color: var(--text); }
+.current-badge {
+  display: inline-block; background: var(--blue-l); color: var(--blue);
+  font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+/* How it works modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(15,27,53,.6); backdrop-filter: blur(4px);
+  z-index: 200; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white; border-radius: 20px;
+  width: 680px; max-height: 80vh; overflow-y: auto;
+  padding: 36px; box-shadow: var(--shadow-lg);
+}
+.modal-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 24px;
+}
+.how-step {
+  display: flex; gap: 16px; margin-bottom: 22px;
+}
+.how-step-num {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--blue), var(--indigo));
+  color: white; font-family: 'Sora', sans-serif;
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.how-step-title {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600; font-size: 15px; color: var(--navy); margin-bottom: 5px;
+}
+.how-step-desc { font-size: 13px; color: var(--slate); line-height: 1.65; }
+.modal-close {
+  position: absolute; top: 16px; right: 20px;
+  background: none; border: none; font-size: 20px; cursor: pointer;
+  color: var(--muted); padding: 4px;
+}
+
+#screen-chat {
+  overflow: hidden;
+}
+
+/* ── UTILITIES ────────────────────────────────────────────────────────── */
+.tag-blue {
+  background: var(--blue-l); color: var(--blue);
+  font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 20px;
+}
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+.text-muted { color: var(--muted); font-size: 13px; }
+.loading-bar {
+  height: 3px; background: linear-gradient(90deg, var(--blue), var(--purp), var(--blue));
+  background-size: 200% 100%; border-radius: 2px;
+  animation: loading 1.5s linear infinite; display: none;
+  position: fixed; top: 60px; left: 0; right: 0; z-index: 99;
+}
+.loading-bar.active { display: block; }
+/* ── PRICING SECTION ─────────────────────────────────────────────────── */
+.pricing-section {
+  padding: 60px 40px 80px;
+  max-width: 1100px; margin: 0 auto;
+  background: white;
+}
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 40px;
+}
+.pricing-card {
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 24px 20px; background: white;
+  display: flex; flex-direction: column; gap: 0;
+  transition: all .25s; position: relative;
+}
+.pricing-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.pricing-card.featured {
+  border-color: var(--blue); border-width: 2px;
+  background: linear-gradient(160deg,#EFF6FF 0%,white 60%);
+}
+.pricing-card.enterprise { background: var(--navy); border-color: var(--navy); }
+.popular-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg,var(--blue),var(--indigo));
+  color: white; font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  padding: 3px 14px; border-radius: 20px; white-space: nowrap;
+}
+.pricing-tier { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+.pricing-card.enterprise .pricing-tier { color: rgba(255,255,255,.5); }
+.pricing-price { font-family: 'Sora',sans-serif; font-size: 32px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.pricing-card.enterprise .pricing-price { color: white; }
+.pricing-price span { font-size: 14px; font-weight: 400; color: var(--muted); }
+.pricing-card.enterprise .pricing-price span { color: rgba(255,255,255,.5); }
+.pricing-desc { font-size: 13px; color: var(--slate); margin-bottom: 18px; line-height: 1.5; }
+.pricing-card.enterprise .pricing-desc { color: rgba(255,255,255,.6); }
+.pricing-divider { height: 1px; background: var(--border); margin-bottom: 14px; }
+.pricing-card.enterprise .pricing-divider { background: rgba(255,255,255,.1); }
+.pricing-feature { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+.pricing-card.enterprise .pricing-feature { color: rgba(255,255,255,.8); }
+.pf-check { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+.pf-lock { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; opacity: .4; }
+.pricing-cta { margin-top: auto; padding-top: 16px; }
+
+/* ── PRO GATE ────────────────────────────────────────────────────────── */
+.pro-gate {
+  position: relative; border-radius: var(--radius);
+  overflow: hidden;
+}
+.pro-gate-blur {
+  filter: blur(4px); pointer-events: none; user-select: none;
+}
+.pro-gate-overlay {
+  position: absolute; inset: 0;
+  background: rgba(248,250,252,.88);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius);
+  border: 1.5px dashed var(--blue2);
+}
+.pro-gate-label {
+  text-align: center;
+}
+.pro-gate-label .pro-badge {
+  display: inline-block; background: linear-gradient(135deg,var(--blue),var(--indigo));
+  color: white; font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  padding: 3px 12px; border-radius: 20px; margin-bottom: 6px;
+}
+.pro-gate-label p { font-size: 12px; color: var(--slate); }
+.pro-gate-label button { margin-top: 8px; }
+</style>
+
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     NAV
+═══════════════════════════════════════════════════════ -->
+<nav>
+  <div class="nav-logo" onclick="goTo('landing')">
+    <div class="logo-dot"></div>
+    OfferCoach <span>AI</span>
+  </div>
+  <div class="nav-steps">
+    <div class="nav-step active" id="nav-landing" onclick="goTo('landing')">
+      <span class="nav-step-num">1</span>Home
+    </div>
+    <div class="nav-step" id="nav-setup" onclick="goTo('setup')">
+      <span class="nav-step-num">2</span>Session Setup
+    </div>
+    <div class="nav-step" id="nav-chat" onclick="goTo('chat')">
+      <span class="nav-step-num">3</span>Coaching Chat
+    </div>
+    <div class="nav-step" id="nav-report" onclick="goTo('report')">
+      <span class="nav-step-num">4</span>Radar Report
+    </div>
+    <div class="nav-step" id="nav-pricing" onclick="goTo('pricing')">
+      <span class="nav-step-num">5</span>Pricing
+    </div>
+  </div>
+  <button class="btn btn-ghost btn-sm" onclick="openModal()">How it works</button>
+</nav>
+<div class="loading-bar" id="loading-bar"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 1 — LANDING
+═══════════════════════════════════════════════════════ -->
+<div id="screen-landing" class="screen active">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <div class="hero-badge">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/><circle cx="6" cy="6" r="2" fill="currentColor"/></svg>
+        AI-Powered Interview Coaching
+      </div>
+      <h1 class="hero-title">
+        They let you<br/>practice.<br/>
+        <span class="accent">We make you better.</span>
+      </h1>
+      <p class="hero-tagline">Interview coaching customized to your company, role, and resume — powered by AI.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px">
+        <div style="display:flex;align-items:center;gap:9px;font-size:14px;color:var(--slate)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#EAF3DE"/><path d="M5 8L7 10L11 6" stroke="#639922" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Questions generated from the actual job description
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:14px;color:var(--slate)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#EAF3DE"/><path d="M5 8L7 10L11 6" stroke="#639922" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Real-time scoring across 4 dimensions after every answer
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:14px;color:var(--slate)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#EAF3DE"/><path d="M5 8L7 10L11 6" stroke="#639922" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Tracks skill growth across sessions on a radar chart
+        </div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:14px;color:var(--slate)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#EAF3DE"/><path d="M5 8L7 10L11 6" stroke="#639922" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Free to start — no credit card required
+        </div>
+      </div>
+      <div class="hero-ctas">
+        <button class="btn btn-primary btn-lg" onclick="goTo('setup')">
+          Start for free →
+        </button>
+        <button class="btn btn-ghost btn-lg" onclick="openModal()">See how it works</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:14px">Used by students preparing for roles at Amazon, Google, Stripe, and more.</p>
+    </div>
+    <div class="hero-visual">
+      <div class="mini-chat">
+        <div class="mini-chat-header">
+          <div class="logo-dot"></div>
+          OfferCoach AI · Amazon BA I · CompanyDNA T1
+        </div>
+        <div class="mini-msg ai">
+          <strong>Tell me about a time you used data to influence a business decision under ambiguity.</strong>
+        </div>
+        <div class="mini-msg user">
+          In my IS capstone, I analyzed drop-off in a registration funnel using SQL, found the friction point, and recommended a UI change that reduced abandonment...
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:8px 10px;margin-top:8px;border-left:3px solid var(--indigo)">
+          <div style="font-size:11px;font-weight:600;color:var(--indigo);margin-bottom:6px">AI Coaching Feedback</div>
+          <div style="font-size:11px;color:var(--slate);line-height:1.5">Good structure. Add a measurable result — e.g. "reduced abandonment by 23%". Clarify your personal ownership in the outcome.</div>
+        </div>
+        <div class="mini-scores">
+          <div class="mini-score-item">
+            <div class="mini-score-label">Logic</div>
+            <div class="mini-score-bar"><div class="mini-score-fill" style="width:72%"></div></div>
+            <div class="mini-score-val">72</div>
+          </div>
+          <div class="mini-score-item">
+            <div class="mini-score-label">Specificity</div>
+            <div class="mini-score-bar"><div class="mini-score-fill" style="width:58%"></div></div>
+            <div class="mini-score-val">58</div>
+          </div>
+          <div class="mini-score-item">
+            <div class="mini-score-label">Relevance</div>
+            <div class="mini-score-bar"><div class="mini-score-fill" style="width:81%"></div></div>
+            <div class="mini-score-val">81</div>
+          </div>
+          <div class="mini-score-item">
+            <div class="mini-score-label">Clarity</div>
+            <div class="mini-score-bar"><div class="mini-score-fill" style="width:76%"></div></div>
+            <div class="mini-score-val">76</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF BAR -->
+  <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:18px 40px;background:white;display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap">
+    <div style="font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.06em;text-transform:uppercase">Preparing candidates for</div>
+    <div style="font-size:14px;font-weight:600;color:var(--slate)">Amazon</div>
+    <div style="font-size:14px;font-weight:600;color:var(--slate)">Google</div>
+    <div style="font-size:14px;font-weight:600;color:var(--slate)">Stripe</div>
+    <div style="font-size:14px;font-weight:600;color:var(--slate)">McKinsey</div>
+    <div style="font-size:14px;font-weight:600;color:var(--slate)">Goldman Sachs</div>
+    <div style="font-size:14px;font-weight:600;color:var(--slate)">Meta</div>
+  </div>
+
+  <!-- PROBLEM SECTION -->
+  <section style="padding:64px 40px;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center">
+    <div>
+      <div style="font-size:11px;font-weight:600;color:var(--blue);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px">The problem</div>
+      <h2 style="font-family:'Sora',sans-serif;font-size:30px;font-weight:700;color:var(--navy);line-height:1.2;margin-bottom:16px">Most candidates are preparing the wrong way</h2>
+      <p style="color:var(--slate);font-size:15px;line-height:1.7;margin-bottom:24px">Generic question banks don't know what Amazon actually asks. They don't know your background. And they never tell you why your answer fell short.</p>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:32px;height:32px;border-radius:8px;background:#FEF2F2;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M7 2L12 7L7 12" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">Generic question banks</div>
+            <div style="font-size:12px;color:var(--muted)">Same 50 questions regardless of the company or role you're applying to</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:32px;height:32px;border-radius:8px;background:#FEF2F2;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M7 2L12 7L7 12" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">No feedback on your actual answers</div>
+            <div style="font-size:12px;color:var(--muted)">Practice tools let you answer and move on — they never tell you what was weak</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:32px;height:32px;border-radius:8px;background:#FEF2F2;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M7 2L12 7L7 12" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">Human coaching costs $200–500/hr</div>
+            <div style="font-size:12px;color:var(--muted)">Inaccessible for most students and early-career candidates</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:white;border:1.5px solid var(--border);border-radius:var(--radius);padding:18px">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Without OfferCoach AI</div>
+        <div style="font-size:13px;color:var(--slate);line-height:1.7">"I answered 50 practice questions from a generic bank. Got an Amazon interview. Completely blanked when they asked about a time I used data to influence a decision — nothing in the bank prepared me for that."</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border:1.5px solid #C7D2FE;border-radius:var(--radius);padding:18px">
+        <div style="font-size:11px;font-weight:600;color:var(--indigo);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">With OfferCoach AI</div>
+        <div style="font-size:13px;color:var(--navy);line-height:1.7">"I pasted the Amazon BA JD. It generated questions about SQL dashboards and cross-functional stakeholder work — exactly what they asked. The coaching told me to add metrics. I did. I got the offer."</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features-section" style="background:var(--bg)">
+    <div style="font-size:11px;font-weight:600;color:var(--blue);letter-spacing:.08em;text-transform:uppercase;text-align:center;margin-bottom:12px">What's inside</div>
+    <h2 class="section-title">Five features that work together</h2>
+    <p class="section-sub">Not just a question bank. A complete coaching loop from JD to offer.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#EFF6FF">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2C10 2 6 5 6 9C6 11.2 7.8 13 10 13C12.2 13 14 11.2 14 9C14 5 10 2 10 2Z" stroke="#2563EB" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 13V18" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round"/><path d="M7 16H13" stroke="#2563EB" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="9" r="1.5" fill="#2563EB"/></svg>
+        </div>
+        <div class="feature-name">CompanyDNA</div>
+        <div class="feature-desc">Surfaces real interview patterns from Glassdoor, Blind, and LinkedIn for your target company. Shows a confidence tier so you know exactly what data is driving the questions.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#F0FDF4">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="#10B981" stroke-width="1.5"/><path d="M7 7H13M7 10H13M7 13H10" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feature-name">ResumeMatch</div>
+        <div class="feature-desc">Parses your resume and maps your real experiences to each question. Suggests a personalized STAR framework before you answer — based on your actual background, not generic examples.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#EDE9FE">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="12" width="3" height="6" rx="1" fill="#4F46E5"/><rect x="7" y="8" width="3" height="10" rx="1" fill="#4F46E5" opacity=".7"/><rect x="12" y="5" width="3" height="13" rx="1" fill="#4F46E5" opacity=".5"/></svg>
+        </div>
+        <div class="feature-name">4-Dimension Scoring</div>
+        <div class="feature-desc">Every answer is scored across Logic, Specificity, Role Relevance, and Clarity in real time — not after the session. You see exactly where you lost points and what to fix.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#FFFBEB">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3L11.8 7.6L17 8.1L13.2 11.5L14.4 16.6L10 14L5.6 16.6L6.8 11.5L3 8.1L8.2 7.6L10 3Z" stroke="#F59E0B" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="feature-name">STAR Structure Coach</div>
+        <div class="feature-desc">Detects which components of your answer are missing or weak. Prompts you to complete the Situation, Task, Action, and Result in real time — building the habit, not just flagging the gap.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#EDE9FE">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3L10 17M3 10H17" stroke="#E2E8F0" stroke-width="1"/><path d="M10 3C10 3 14 6 14 10C14 14 10 17 10 17C10 17 6 14 6 10C6 6 10 3 10 3Z" stroke="#7C3AED" stroke-width="1.5"/><path d="M3 10C3 10 6 6 10 6C14 6 17 10 17 10" stroke="#7C3AED" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feature-name">Radar Growth Tracking</div>
+        <div class="feature-desc">Saves scores across sessions and visualizes your skill growth on a radar chart. Progress becomes tangible — the key retention mechanic that keeps users coming back session after session.</div>
+      </div>
+      <div class="feature-card" style="background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border-color:#C7D2FE">
+        <div class="feature-icon" style="background:white">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 14L4 6C4 4.9 4.9 4 6 4L14 4C15.1 4 16 4.9 16 6L16 14" stroke="#4F46E5" stroke-width="1.5" stroke-linecap="round"/><path d="M2 14H18" stroke="#4F46E5" stroke-width="1.5" stroke-linecap="round"/><path d="M8 8H12M8 11H11" stroke="#4F46E5" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feature-name">Coaching, not practice</div>
+        <div class="feature-desc">Every other tool gives you a question and waits for the next one. OfferCoach AI evaluates, identifies the gap, and tells you exactly what to say differently. That's the difference.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BOTTOM -->
+  <section style="padding:64px 40px;text-align:center;background:white;border-top:1px solid var(--border)">
+    <h2 style="font-family:'Sora',sans-serif;font-size:28px;font-weight:700;color:var(--navy);margin-bottom:10px">Ready to stop practicing and start improving?</h2>
+    <p style="color:var(--slate);font-size:15px;margin-bottom:28px">Paste a real JD. Get real questions. Receive real coaching. Free to start.</p>
+    <button class="btn btn-primary btn-lg" onclick="goTo('setup')">Start your first session →</button>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px">No account required · Free tier available · Pro from $19/mo</p>
+  </section>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 2 — SESSION SETUP
+═══════════════════════════════════════════════════════ -->
+<div id="screen-setup" class="screen">
+  <div class="setup-layout">
+    <div>
+      <!-- DEMO SESSION BANNER -->
+      <div style="background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border:1.5px solid #C7D2FE;border-radius:var(--radius);padding:16px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:var(--indigo);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Demo Mode Available</div>
+          <div style="font-size:13px;color:var(--navy);font-weight:500">Elina · Amazon BA I · ResumeMatch pre-loaded</div>
+          <div style="font-size:12px;color:var(--slate);margin-top:2px">Skip setup — jump straight into a pre-configured coaching session with resume context</div>
+        </div>
+        <button class="btn btn-primary btn-sm" style="white-space:nowrap;flex-shrink:0" onclick="loadDemoSession()">
+          Load Demo →
+        </button>
+      </div>
+
+      <p class="page-title">New Coaching Session</p>
+      <p class="page-sub">Paste a real job description for personalized questions and coaching.</p>
+
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Company Name</label>
+          <input class="form-input" id="company-input" value="Amazon" placeholder="e.g. Amazon, Google, Stripe"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target Role</label>
+          <input class="form-input" id="role-input" value="Business Analyst I" placeholder="e.g. Business Analyst, Data Analyst"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Job Description</label>
+          <textarea class="form-textarea" id="jd-input" placeholder="Paste the full job description here...">Amazon — Business Analyst I, Verification Services
+Job ID: 10376846 · amazon.jobs/en/jobs/10376846
+
+About the role:
+Join VS Analytics to transform seller verification data into insights that power Amazon's global marketplace. As a Business Analyst I, you'll build dashboards and provide analytics that help product teams improve the registration and verification experience for millions of sellers worldwide.
+
+Key Responsibilities:
+- Build and maintain SQL queries and Amazon QuickSight dashboards to support business needs
+- Work with stakeholders to gather requirements for analytics projects
+- Develop understanding of VS Analytics data sources to solve defined business problems
+- Design datasets that provide timely access to actionable business information
+- Analyze seller registration funnels, verification processes, and ready-to-launch metrics
+- Communicate findings clearly to cross-functional teams and leadership
+
+Basic Qualifications:
+- Bachelor's degree in Statistics, Mathematics, Computer Science, Economics, or related field
+- Experience with SQL and data querying
+- Strong analytical and problem-solving skills
+- Ability to translate business questions into data analysis frameworks
+
+Preferred Qualifications:
+- Experience with data visualization tools (Tableau, QuickSight, Looker)
+- Familiarity with Python or R for data analysis
+- Experience presenting data-driven insights to non-technical stakeholders
+- Track record of working across cross-functional teams</textarea>
+        </div>
+
+        <!-- Resume area — switches between gate (Free) and textarea (Pro) -->
+        <div class="form-group">
+          <label class="form-label">
+            Resume
+            <span id="resume-pro-tag" style="font-size:11px;font-weight:600;background:linear-gradient(135deg,var(--blue),var(--indigo));color:white;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle">PRO</span>
+            <span class="text-muted" style="font-size:12px;margin-left:4px">ResumeMatch</span>
+          </label>
+
+          <!-- Free: upload gate -->
+          <div id="resume-free-area" class="upload-area" onclick="handleResumeClick(this)">
+            <div class="upload-icon">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="4" y="6" width="20" height="16" rx="3" stroke="#94A3B8" stroke-width="1.5"/><path d="M14 10V18M10 14L14 10L18 14" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div>Click to upload resume</div>
+            <div style="font-size:12px;margin-top:4px;color:var(--muted)">Pro feature — upgrade to activate ResumeMatch</div>
+          </div>
+
+          <!-- Pro: paste textarea (hidden until Pro activated) -->
+          <div id="resume-pro-area" style="display:none">
+            <textarea class="form-textarea" id="resume-input" placeholder="Paste your resume text here...
+(Copy and paste the text content of your resume — ResumeMatch will map your experiences to each interview question)" style="height:130px;font-size:13px"></textarea>
+            <div style="font-size:12px;color:var(--green);margin-top:5px;display:flex;align-items:center;gap:5px">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="6" fill="#EAF3DE"/><path d="M4 6.5L5.5 8L9 5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              ResumeMatch active — AI will personalize questions and scaffold answers from your background
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="analyzeJD()">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="white" stroke-width="1.5"/><path d="M10.5 10.5L13.5 13.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Analyze JD &amp; Generate Questions
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <!-- CompanyDNA Panel -->
+      <div class="dna-panel" id="dna-panel">
+        <div class="dna-header">
+          <div class="dna-badge">CompanyDNA</div>
+          <div class="dna-title">Pattern Detection</div>
+        </div>
+        <div class="dna-tier">
+          <span class="text-muted" style="font-size:13px">Detected Tier</span>
+          <span class="dna-tier-badge" style="background:white;color:#0C447C;border-color:#BFDBFE">T1 — High Match</span>
+        </div>
+        <div class="confidence-bar-wrap">
+          <div class="confidence-label">
+            <span>Confidence Score</span>
+            <span class="confidence-val">94%</span>
+          </div>
+          <div class="confidence-bar"><div class="confidence-fill" style="width:94%"></div></div>
+        </div>
+        <div class="dna-reason">
+          Amazon BA interview patterns extracted from 2,400+ Glassdoor and Blind reports. Strong signal on: <em>SQL proficiency, data-driven decision making, Leadership Principles (Customer Obsession, Dive Deep), cross-functional stakeholder communication, ambiguity handling</em>.
+        </div>
+      </div>
+
+      <!-- JD Keywords -->
+      <div class="keywords-panel card">
+        <div class="kw-title">JD Key Themes Detected</div>
+        <div class="kw-tags">
+          <span class="kw-tag">SQL & data querying</span>
+          <span class="kw-tag">Dashboard building</span>
+          <span class="kw-tag">Stakeholder comms</span>
+          <span class="kw-tag">Cross-functional</span>
+          <span class="kw-tag">Leadership Principles</span>
+          <span class="kw-tag">Ambiguity handling</span>
+        </div>
+      </div>
+
+      <!-- What to expect -->
+      <div class="card" style="margin-top:0">
+        <div class="card-header"><div class="dot" style="background:var(--blue)"></div>What happens next</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:10px;font-size:13px;color:var(--slate)">
+            <span style="color:var(--blue);font-weight:700">1</span>
+            AI generates 3 JD-specific interview questions
+          </div>
+          <div style="display:flex;gap:10px;font-size:13px;color:var(--slate)">
+            <span style="color:var(--blue);font-weight:700">2</span>
+            You answer each question in the coaching chat
+          </div>
+          <div style="display:flex;gap:10px;font-size:13px;color:var(--slate)">
+            <span style="color:var(--blue);font-weight:700">3</span>
+            Real-time scoring and STAR coaching after each answer
+          </div>
+          <div style="display:flex;gap:10px;font-size:13px;color:var(--slate)">
+            <span style="color:var(--blue);font-weight:700">4</span>
+            Radar report shows your growth vs. last session
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 3 — COACHING CHAT
+═══════════════════════════════════════════════════════ -->
+<div id="screen-chat" class="screen">
+  <div class="chat-layout">
+
+    <!-- LEFT: Chat -->
+    <div class="chat-main">
+      <div class="chat-topbar">
+        <div class="chat-session-info">
+          <span class="chat-session-badge">Amazon · BA I · Round 1 Behavioral</span>
+          <span class="chat-session-name">Coaching Session</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="q-counter">Question</span>
+          <div class="q-dots">
+            <div class="q-dot active" id="qdot-0"></div>
+            <div class="q-dot" id="qdot-1"></div>
+            <div class="q-dot" id="qdot-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question pills -->
+      <div class="chat-q-pills">
+        <div class="q-pill active" onclick="switchQ(0)">Q1 · Data-Driven Decision</div>
+        <div class="q-pill" onclick="switchQ(1)">Q2 · Stakeholder Influence</div>
+        <div class="q-pill" onclick="switchQ(2)">Q3 · Ambiguity & Analysis</div>
+      </div>
+
+      <!-- Messages -->
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg ai" id="current-question">
+          <div class="msg-avatar ai">AI</div>
+          <div>
+            <div class="msg-label">OfferCoach AI · Q1 of 3</div>
+            <div class="msg-bubble">
+              Tell me about a time you prioritized product features under limited resources.
+            </div>
+          </div>
+        </div>
+      </div><!-- end chat-messages -->
+
+      <!-- thinking indicator lives inside messages, injected by JS -->
+      <div class="chat-input-area">
+        <textarea class="chat-textarea" id="answer-input"
+          placeholder="Type your answer here... Be specific about your role, the situation, and the outcome."></textarea>
+        <button class="send-btn" id="send-btn" onclick="submitAnswer()">
+          Submit →
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Dashboard -->
+    <div class="chat-dashboard">
+
+      <!-- Scores -->
+      <div class="card score-panel">
+        <div class="card-header">
+          <div class="dot" style="background:var(--blue)"></div>
+          Real-time Score
+        </div>
+        <div id="scores-placeholder" style="color:var(--muted);font-size:13px;padding:8px 0">
+          Scores will appear after you submit your answer.
+        </div>
+        <div id="scores-panel" style="display:none">
+          <div class="score-row">
+            <span class="score-name">Logic</span>
+            <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill" id="score-logic" style="width:0%"></div></div></div>
+            <span class="score-val" id="score-logic-val">—</span>
+          </div>
+          <div class="score-row">
+            <span class="score-name">Specificity</span>
+            <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill" id="score-spec" style="width:0%"></div></div></div>
+            <span class="score-val" id="score-spec-val">—</span>
+          </div>
+          <div class="score-row">
+            <span class="score-name">Role Relevance</span>
+            <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill" id="score-rel" style="width:0%"></div></div></div>
+            <span class="score-val" id="score-rel-val">—</span>
+          </div>
+          <div class="score-row">
+            <span class="score-name">Clarity</span>
+            <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill" id="score-clarity" style="width:0%"></div></div></div>
+            <span class="score-val" id="score-clarity-val">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAR -->
+      <div class="card">
+        <div class="card-header">
+          <div class="dot" style="background:var(--amber)"></div>
+          STAR Detection
+        </div>
+        <div id="star-placeholder" style="color:var(--muted);font-size:13px;padding:8px 0">
+          STAR analysis will appear after you submit.
+        </div>
+        <div id="star-panel" style="display:none">
+          <div class="star-grid">
+            <div class="star-item" id="star-s">
+              <div class="star-letter">S</div>
+              <div class="star-info">
+                <div class="star-name">Situation</div>
+                <div class="star-status" id="star-s-status">—</div>
+              </div>
+            </div>
+            <div class="star-item" id="star-t">
+              <div class="star-letter">T</div>
+              <div class="star-info">
+                <div class="star-name">Task</div>
+                <div class="star-status" id="star-t-status">—</div>
+              </div>
+            </div>
+            <div class="star-item" id="star-a">
+              <div class="star-letter">A</div>
+              <div class="star-info">
+                <div class="star-name">Action</div>
+                <div class="star-status" id="star-a-status">—</div>
+              </div>
+            </div>
+            <div class="star-item" id="star-r">
+              <div class="star-letter">R</div>
+              <div class="star-info">
+                <div class="star-name">Result</div>
+                <div class="star-status" id="star-r-status">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Suggestion -->
+      <div id="suggestion-area" style="display:none">
+        <div class="suggestion-box">
+          <div class="suggestion-title">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1C6.5 1 4 3.5 4 5.5C4 6.88 5.12 8 6.5 8C7.88 8 9 6.88 9 5.5C9 3.5 6.5 1 6.5 1Z" stroke="#4F46E5" stroke-width="1.2" stroke-linejoin="round"/><path d="M6.5 8V11.5" stroke="#4F46E5" stroke-width="1.2" stroke-linecap="round"/><path d="M4.5 10.5H8.5" stroke="#4F46E5" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Coaching Suggestion
+          </div>
+          <div class="suggestion-text" id="suggestion-text"></div>
+        </div>
+      </div>
+
+      <!-- Framework -->
+      <div id="framework-area" style="display:none">
+        <div class="framework-box">
+          <div class="framework-header">Improved Answer Framework</div>
+          <div class="framework-body" id="framework-body"></div>
+        </div>
+      </div>
+
+      <!-- Next Question / Follow-up controls -->
+      <div id="next-area" style="display:none">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary" style="width:100%;justify-content:center" id="next-q-btn" onclick="advanceQuestion()">
+            Next Question →
+          </button>
+          <button class="btn btn-secondary" style="width:100%;justify-content:center" onclick="askFollowup()">
+            Ask a follow-up question
+          </button>
+        </div>
+      </div>
+
+      <!-- View report btn -->
+      <div id="report-btn-area" style="display:none">
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="goTo('report')">
+          View Radar Report →
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 4 — RADAR REPORT
+═══════════════════════════════════════════════════════ -->
+<div id="screen-report" class="screen">
+
+  <!-- LOCKED STATE — shown before any session completed -->
+  <div id="report-locked" style="min-height:calc(100vh - 60px);display:flex;align-items:center;justify-content:center;background:var(--bg)">
+    <div style="text-align:center;max-width:420px;padding:40px">
+      <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border:1.5px solid #C7D2FE;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="5" y="12" width="18" height="13" rx="3" stroke="#4F46E5" stroke-width="1.8"/><path d="M9 12V8.5a5 5 0 0110 0V12" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round"/><circle cx="14" cy="18.5" r="1.5" fill="#4F46E5"/></svg>
+      </div>
+      <h2 style="font-family:'Sora',sans-serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:10px">Your radar report will appear here</h2>
+      <p style="color:var(--slate);font-size:14px;line-height:1.7;margin-bottom:28px">Complete a coaching session first. After you answer all three questions, your scores will be saved and your growth chart will unlock.</p>
+      <button class="btn btn-primary" onclick="goTo('setup')">Start a coaching session →</button>
+      <p style="font-size:12px;color:var(--muted);margin-top:14px">Your progress will be tracked across sessions automatically.</p>
+    </div>
+  </div>
+
+  <!-- UNLOCKED STATE — shown after session complete -->
+  <div id="report-unlocked" style="display:none">
+  <div class="report-layout">
+    <div>
+      <p class="page-title" id="report-title">Your Growth Report</p>
+      <p class="page-sub" id="report-sub">Session complete · Tech Track</p>
+
+      <div class="card radar-card">
+        <div class="radar-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:rgba(37,99,235,.8)"></div>
+            Current session
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:rgba(148,163,184,.5)"></div>
+            Previous session
+          </div>
+        </div>
+        <div class="radar-wrap">
+          <canvas id="radar-chart" width="300" height="300"></canvas>
+        </div>
+        <div class="improvement-list">
+          <div class="card-header"><div class="dot" style="background:var(--green)"></div>Key improvement areas</div>
+          <div class="improvement-item"><div class="improvement-num">1</div><span id="tip-1">Add measurable results to strengthen specificity.</span></div>
+          <div class="improvement-item"><div class="improvement-num">2</div><span id="tip-2">Make STAR structure more complete — clarify Task and quantify Results.</span></div>
+          <div class="improvement-item"><div class="improvement-num">3</div><span id="tip-3">Connect past experience more directly to the role's core responsibilities.</span></div>
+        </div>
+        <div class="next-practice">
+          <div class="next-practice-label">Next recommended practice</div>
+          <div class="next-practice-text" id="next-practice-text">Practice data-driven decision making and stakeholder communication.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Session history -->
+    <div class="sessions-col" id="radar-history-section">
+      <div class="card-header" style="margin-bottom:0"><div class="dot" style="background:var(--purp)"></div>Session History</div>
+      <div id="session-history-list">
+        <!-- populated dynamically -->
+      </div>
+      <div class="card" style="background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border-color:#C7D2FE">
+        <div class="card-header"><div class="dot" style="background:var(--indigo)"></div>Score change vs previous</div>
+        <div style="display:flex;flex-direction:column;gap:8px" id="score-change-section">
+          <div class="score-row">
+            <span class="score-name" style="font-size:12px">Logic</span>
+            <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill" id="rc-logic" style="width:0%"></div></div></div>
+            <span class="score-val" style="color:var(--green);font-size:12px" id="rc-logic-delta">—</span>
+          </div>
+          <div class="score-row">
+            <span class="score-name" style="font-size:12px">Specificity</span>
+            <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill" id="rc-spec" style="width:0%"></div></div></div>
+            <span class="score-val" style="color:var(--green);font-size:12px" id="rc-spec-delta">—</span>
+          </div>
+          <div class="score-row">
+            <span class="score-name" style="font-size:12px">Role Relevance</span>
+            <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill" id="rc-rel" style="width:0%"></div></div></div>
+            <span class="score-val" style="color:var(--green);font-size:12px" id="rc-rel-delta">—</span>
+          </div>
+          <div class="score-row">
+            <span class="score-name" style="font-size:12px">Clarity</span>
+            <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill" id="rc-clarity" style="width:0%"></div></div></div>
+            <span class="score-val" style="color:var(--green);font-size:12px" id="rc-clarity-delta">—</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="goTo('setup')">
+        Start Next Session →
+      </button>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 5 — PRICING
+═══════════════════════════════════════════════════════ -->
+<div id="screen-pricing" class="screen">
+  <section class="pricing-section">
+    <h2 class="section-title">Simple, transparent pricing</h2>
+    <p class="section-sub">Start free. Upgrade when you're ready to go deeper.</p>
+    <div class="pricing-grid">
+
+      <!-- FREE -->
+      <div class="pricing-card">
+        <div class="pricing-tier">Free</div>
+        <div class="pricing-price">$0<span> /mo</span></div>
+        <div class="pricing-desc">Try it before you commit. Perfect for a first session.</div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          3 coaching sessions / month
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          JD-based question generation
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Real-time 4-dimension scoring
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          STAR structure coaching
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-lock" viewBox="0 0 14 14" fill="none"><rect x="3" y="6" width="8" height="6" rx="1.5" stroke="#94A3B8" stroke-width="1.2"/><path d="M5 6V4.5a2 2 0 014 0V6" stroke="#94A3B8" stroke-width="1.2"/></svg>
+          <span style="color:var(--muted)">CompanyDNA T1/T2 — Pro</span>
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-lock" viewBox="0 0 14 14" fill="none"><rect x="3" y="6" width="8" height="6" rx="1.5" stroke="#94A3B8" stroke-width="1.2"/><path d="M5 6V4.5a2 2 0 014 0V6" stroke="#94A3B8" stroke-width="1.2"/></svg>
+          <span style="color:var(--muted)">ResumeMatch scaffold — Pro</span>
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-lock" viewBox="0 0 14 14" fill="none"><rect x="3" y="6" width="8" height="6" rx="1.5" stroke="#94A3B8" stroke-width="1.2"/><path d="M5 6V4.5a2 2 0 014 0V6" stroke="#94A3B8" stroke-width="1.2"/></svg>
+          <span style="color:var(--muted)">Cross-session radar tracking — Pro</span>
+        </div>
+        <div class="pricing-cta">
+          <button class="btn btn-secondary" style="width:100%;justify-content:center" onclick="goTo('setup')">Get started free</button>
+        </div>
+      </div>
+
+      <!-- PRO -->
+      <div class="pricing-card featured">
+        <div class="popular-badge">Most Popular</div>
+        <div class="pricing-tier">Pro</div>
+        <div class="pricing-price">$19<span> /mo</span></div>
+        <div class="pricing-desc">Full coaching loop. Everything Elina needs to convert interviews into offers.</div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Unlimited sessions
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          CompanyDNA T1/T2/T3 — all tiers
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Resume upload + ResumeMatch
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Full 4-dimension real-time scoring
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          STAR structure coach
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Full radar chart + session history
+        </div>
+        <div class="pricing-cta">
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="activatePro()">Upgrade to Pro</button>
+        </div>
+      </div>
+
+      <!-- UNIVERSITY -->
+      <div class="pricing-card">
+        <div class="pricing-tier">University</div>
+        <div class="pricing-price">$8K<span> /yr</span></div>
+        <div class="pricing-desc">Campus-wide access for career centers. Help every student prepare.</div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Unlimited student seats
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Career center analytics dashboard
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          All Pro features included
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#EAF3DE"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="#639922" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Priority support
+        </div>
+        <div class="pricing-cta">
+          <button class="btn btn-secondary" style="width:100%;justify-content:center">Contact sales</button>
+        </div>
+      </div>
+
+      <!-- ENTERPRISE -->
+      <div class="pricing-card enterprise">
+        <div class="pricing-tier">Enterprise HR</div>
+        <div class="pricing-price">$15K<span style="color:rgba(255,255,255,.4)"> /yr</span></div>
+        <div class="pricing-desc" style="color:rgba(255,255,255,.6)">Pre-screening tool for HR teams. Rank candidates before live interviews.</div>
+        <div class="pricing-divider"></div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="rgba(255,255,255,.15)"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Candidate pre-screening module
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="rgba(255,255,255,.15)"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Candidate ranking & scoring reports
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="rgba(255,255,255,.15)"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          ATS integration (Greenhouse, Lever)
+        </div>
+        <div class="pricing-feature">
+          <svg class="pf-check" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="rgba(255,255,255,.15)"/><path d="M4.5 7L6.5 9L9.5 5.5" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Custom company interview patterns
+        </div>
+        <div class="pricing-cta">
+          <button class="btn" style="width:100%;justify-content:center;background:rgba(255,255,255,.15);color:white;border:1.5px solid rgba(255,255,255,.3)">Contact sales</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PRO GATE MODAL — resume upload
+═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="pro-gate-modal" onclick="closeProModal(event)">
+  <div class="modal" style="position:relative;max-width:420px;text-align:center">
+    <button class="modal-close" onclick="document.getElementById('pro-gate-modal').classList.remove('open')">✕</button>
+
+    <!-- Icon -->
+    <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border:1.5px solid #C7D2FE;display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="2" width="18" height="20" rx="3" stroke="#4F46E5" stroke-width="1.6"/><path d="M8 7H16M8 11H16M8 15H12" stroke="#4F46E5" stroke-width="1.6" stroke-linecap="round"/><circle cx="17" cy="17" r="5" fill="white" stroke="#4F46E5" stroke-width="1.4"/><path d="M15.5 17L16.5 18L18.5 16" stroke="#4F46E5" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <div style="display:inline-block;background:linear-gradient(135deg,var(--blue),var(--indigo));color:white;font-size:11px;font-weight:700;letter-spacing:.06em;padding:3px 12px;border-radius:20px;margin-bottom:12px">PRO FEATURE</div>
+
+    <h3 style="font-family:'Sora',sans-serif;font-size:20px;font-weight:700;color:var(--navy);margin-bottom:8px">ResumeMatch requires Pro</h3>
+    <p style="color:var(--slate);font-size:14px;line-height:1.7;margin-bottom:20px">ResumeMatch parses your resume and builds a personalized STAR answer framework for each question — based on your actual experience, not generic examples.</p>
+
+    <!-- What you unlock -->
+    <div style="background:var(--bg);border-radius:10px;padding:14px 16px;text-align:left;margin-bottom:20px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">What Pro unlocks</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#EAF3DE"/><path d="M5 8L7 10L11 6" stroke="#639922" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Resume upload + ResumeMatch answer scaffold
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#EAF3DE"/><path d="M5 8L7 10L11 6" stroke="#639922" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          CompanyDNA T1/T2 — company-specific patterns
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#EAF3DE"/><path d="M5 8L7 10L11 6" stroke="#639922" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Cross-session radar growth tracking
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text)">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#EAF3DE"/><path d="M5 8L7 10L11 6" stroke="#639922" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Unlimited coaching sessions
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1;justify-content:center" onclick="document.getElementById('pro-gate-modal').classList.remove('open')">
+        Continue with Free
+      </button>
+      <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="upgradeFromModal()">
+        Upgrade to Pro — $19/mo
+      </button>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px">Cancel anytime · Billed monthly</p>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════════════════
+     HOW IT WORKS MODAL
+═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">How OfferCoach AI Works</div>
+    <div class="how-step">
+      <div class="how-step-num">1</div>
+      <div>
+        <div class="how-step-title">Input Layer</div>
+        <div class="how-step-desc">Company name triggers CompanyDNA detection. JD text is parsed by the LLM to extract role requirements, skills, and likely interview themes. Resume is parsed to extract experiences and achievements.</div>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-num">2</div>
+      <div>
+        <div class="how-step-title">Question Generation</div>
+        <div class="how-step-desc">The system combines company interview patterns (T1/T2/T3), JD requirements, and resume gaps to generate tailored questions — not generic question-bank prompts.</div>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-num">3</div>
+      <div>
+        <div class="how-step-title">ResumeMatch Scaffold</div>
+        <div class="how-step-desc">User experiences are mapped to each interview question. Before answering, the system suggests a personalized STAR framework based on the user's real background.</div>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-num">4</div>
+      <div>
+        <div class="how-step-title">Answer Evaluation</div>
+        <div class="how-step-desc">The answer is evaluated across Logic, Specificity, Role Relevance, and Clarity. The AI returns structured JSON scores and the dashboard updates immediately.</div>
+      </div>
+    </div>
+    <div class="how-step">
+      <div class="how-step-num">5</div>
+      <div>
+        <div class="how-step-title">Growth Tracking</div>
+        <div class="how-step-desc">Scores are saved across sessions. The radar chart visualizes interview skill growth over time — making improvement tangible and keeping users coming back.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   API KEY — replace with your key for demo
+══════════════════════════════════════════════════════════ */
+const API_KEY = 'YOUR_API_KEY_HERE';
+
+/* ══════════════════════════════════════════════════════════
+   PRO STATE
+══════════════════════════════════════════════════════════ */
+let isPro = false;
+
+function activatePro() {
+  isPro = true;
+  showResumeTextarea();
+  addProBadge();
+  // Remove any existing pro gates
+  document.querySelectorAll('.pro-gate').forEach(el => {
+    el.classList.remove('pro-gate');
+    const blur = el.querySelector('.pro-gate-blur');
+    const overlay = el.querySelector('.pro-gate-overlay');
+    if (blur) blur.classList.remove('pro-gate-blur');
+    if (overlay) overlay.remove();
+  });
+  goTo('setup');
+}
+
+/* ══════════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════════ */
+const screens = ['landing','setup','chat','report','pricing'];
+let currentScreen = 'landing';
+
+function goTo(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  const navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+  currentScreen = name;
+  if (name === 'report') renderReport();
+  window.scrollTo(0, 0);
+}
+
+/* ══════════════════════════════════════════════════════════
+   SESSION SETUP
+══════════════════════════════════════════════════════════ */
+function handleResumeClick(el) {
+  if (!isPro) {
+    document.getElementById('pro-gate-modal').classList.add('open');
+    return;
+  }
+  simulateUpload(el);
+}
+
+function simulateUpload(el) {
+  el.innerHTML = '<div class="upload-icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="11" stroke="#10B981" stroke-width="1.5"/><path d="M9 14L12.5 17.5L19 11" stroke="#10B981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div style="color:var(--green);font-weight:500">resume_elina.pdf uploaded</div><div style="font-size:12px;margin-top:4px;color:var(--muted)">ResumeMatch activated — answers will be scaffolded to your experience</div>';
+}
+
+function upgradeFromModal() {
+  document.getElementById('pro-gate-modal').classList.remove('open');
+  activatePro();
+}
+
+function closeProModal(e) {
+  if (e.target.id === 'pro-gate-modal') {
+    document.getElementById('pro-gate-modal').classList.remove('open');
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   DEMO SESSION — preloaded Elina scenario
+══════════════════════════════════════════════════════════ */
+const ELINA_RESUME = `Elina Duan | Information Systems & AI | Johns Hopkins University (M.S.)
+B.Sc. Mathematics & Statistics, University of Toronto
+
+SKILLS: Python, R, SAS, SQL, Tableau, Power BI, Streamlit, AWS, Figma, HTML, CSS, JavaScript, LaTeX
+
+EXPERIENCE
+Data Analyst Intern — FinEdge Analytics (Summer 2024)
+- Built automated SQL pipelines to clean and standardize 500K+ transaction records across 3 data sources
+- Designed QuickSight dashboards tracking user onboarding funnel; identified a 34% drop-off at step 3
+- Presented findings to product team; recommended UI change that reduced drop-off by 18% in A/B test
+
+Research Assistant — Behavioral Data Lab (2023–2024)
+- Processed dataset of 600+ time-series files; handled 20% missing-value files using interpolation
+- Wrote Python automation scripts for validation; created reproducible pipeline documentation
+
+PROJECTS
+Customer Churn Prediction (Academic, 2024)
+- Built LightGBM model on 200K records; achieved 87% AUC; presented results to faculty panel
+- Translated model outputs into plain-language recommendations for a non-technical audience
+
+SQL Dashboard — Campus Resource Tracker
+- Designed SQLite database and Tableau dashboard to track facility usage across 5 campus buildings
+- Used by student government to reallocate resources; reduced peak-hour congestion by 22%`;
+
+const DEMO_QUESTIONS = [
+  {
+    pill: "Data-Driven Decision",
+    label: "Q1 of 3 · Behavioral · Round 1",
+    text: "Tell me about a time you used data to identify a problem and influence a business decision. What was the situation, what data did you use, and how did you ensure your analysis was sound? (Amazon LP: Dive Deep)"
+  },
+  {
+    pill: "Stakeholder Communication",
+    label: "Q2 of 3 · Behavioral · Round 1",
+    text: "Describe a situation where you had to present a data insight to a non-technical stakeholder. How did you simplify the finding and drive action? (Amazon LP: Earn Trust)"
+  },
+  {
+    pill: "Ambiguity & Messy Data",
+    label: "Q3 of 3 · Behavioral · Round 1",
+    text: "Walk me through a time you had to work with incomplete or messy data. How did you handle the gaps, what assumptions did you make, and what was the outcome? (Amazon LP: Bias for Action)"
+  }
+];
+
+const DEMO_ANSWERS = [
+  `During my internship at FinEdge Analytics, I was asked to investigate why user activation was lower than expected on our payment onboarding flow. There was no clear hypothesis — just a sense that something was wrong. I pulled SQL event logs for 50,000 users over 90 days, cleaned the data to remove bot activity, and built a funnel analysis in QuickSight. I found that 34% of users dropped off at step 3 — the bank verification screen — which was taking an average of 47 seconds to load. I presented this to the product team with a simple visualization showing the drop-off rate by step, and recommended we prioritize a backend optimization for that screen. After the fix was deployed, we ran an A/B test and drop-off at step 3 reduced by 18%.`,
+
+  `At FinEdge, I built a dashboard that tracked our onboarding funnel metrics. The product manager I worked with had no data background — she found SQL outputs confusing and would often ask me to just tell her the number. For one key presentation to leadership, instead of showing a table of conversion rates, I designed a single bar chart that compared our funnel completion rate to the industry benchmark, and framed the insight as one question: "We lose 1 in 3 users before they complete onboarding — where do your competitors lose them?" She immediately understood the priority and used my slide in the leadership meeting. The team greenlit the optimization project that week.`,
+
+  `In my research assistant role, I was processing a dataset of 600+ time-series files for a behavioral study. When I started cleaning, I found that about 20% of the files had missing segments due to a sensor malfunction. I didn't want to just drop them — that would have introduced selection bias. So I documented every affected file in a log, flagged them for the supervising researcher, and we agreed on a rule: files with less than 10% missing could use linear interpolation, files with more would be excluded. I wrote a Python script to apply this consistently across all files. The final dataset went from 612 usable files to a fully documented, reproducible pipeline. The researcher said it was the cleanest handoff she had received from an RA.`
+];
+
+const DEMO_SCAFFOLDS = [
+  {
+    title: "Based on your FinEdge internship",
+    S: "You were investigating low activation on the onboarding flow at FinEdge — no clear hypothesis, just a business concern.",
+    T: "Your task was to identify the drop-off point and recommend a data-backed fix.",
+    A: "You pulled SQL event logs for 50K users, cleaned for bots, built a funnel in QuickSight, and identified step 3 as the bottleneck.",
+    R: "Recommended backend optimization → A/B tested → 18% reduction in drop-off at step 3."
+  },
+  {
+    title: "Based on your FinEdge dashboard work",
+    S: "At FinEdge, you regularly presented funnel metrics to a PM with no data background.",
+    T: "Your goal was to make insights actionable for a non-technical decision-maker.",
+    A: "You replaced a data table with a single benchmark comparison chart and reframed the insight as a business question.",
+    R: "PM used your slide in leadership meeting — optimization project was greenlit that week."
+  },
+  {
+    title: "Based on your Research Assistant role",
+    S: "Your dataset of 600+ time-series files had ~20% with missing segments due to sensor malfunction.",
+    T: "You needed to deliver a clean, analysis-ready dataset without introducing bias.",
+    A: "Documented all affected files, agreed on interpolation vs exclusion threshold, automated the process in Python.",
+    R: "Final dataset fully documented and reproducible — adopted as standard pipeline by the lab."
+  }
+];
+
+function loadDemoSession() {
+  isPro = true;
+  isDemoSession = true;
+  showResumeTextarea();
+
+  // Fill resume textarea
+  document.getElementById('resume-input').value = ELINA_RESUME;
+
+  // Update CompanyDNA panel
+  document.querySelector('.dna-tier-badge').textContent = 'T1 — High Match';
+  document.querySelector('.confidence-val').textContent = '94%';
+  document.querySelector('.confidence-fill').style.width = '94%';
+  document.querySelector('.dna-reason').innerHTML = 'Amazon BA interview patterns extracted from 2,400+ Glassdoor and Blind reports. Strong signal on: <em>SQL proficiency, data-driven decisions, Leadership Principles, cross-functional stakeholder communication, ambiguity handling</em>.';
+  document.querySelector('.kw-tags').innerHTML = ['SQL & data querying','Dashboard building','Stakeholder comms','Cross-functional','Leadership Principles','Ambiguity handling'].map(k => `<span class="kw-tag">${k}</span>`).join('');
+
+  generatedQuestions = DEMO_QUESTIONS;
+  addProBadge();
+
+  // Stay on setup — let user see resume is loaded, then click Analyze JD
+  // Scroll down so the resume textarea is visible
+  setTimeout(() => {
+    document.getElementById('resume-pro-area').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+}
+
+function showResumeTextarea() {
+  document.getElementById('resume-free-area').style.display = 'none';
+  document.getElementById('resume-pro-area').style.display = 'block';
+}
+
+function addProBadge() {
+  if (!document.getElementById('pro-badge')) {
+    const badge = document.createElement('span');
+    badge.id = 'pro-badge';
+    badge.style.cssText = 'background:linear-gradient(135deg,#2563EB,#4F46E5);color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.04em;margin-left:6px';
+    badge.textContent = 'PRO';
+    document.querySelector('.nav-logo').appendChild(badge);
+  }
+}
+function getSessions() {
+  try { return JSON.parse(localStorage.getItem('oc_sessions') || '[]'); } catch(e) { return []; }
+}
+function saveSession(sessionData) {
+  const sessions = getSessions();
+  sessions.push(sessionData);
+  localStorage.setItem('oc_sessions', JSON.stringify(sessions));
+}
+
+/* ══════════════════════════════════════════════════════════
+   COMPANYDNA DETECTION — real AI
+══════════════════════════════════════════════════════════ */
+async function detectCompanyDNA(company, jd) {
+  const systemPrompt = `You are CompanyDNA, an interview intelligence engine.
+Given a company name and job description, analyze the interview pattern tier and return ONLY valid JSON:
+{
+  "tier": "<T1|T2|T3>",
+  "tier_label": "<High Match|Inferred Match|JD-Based>",
+  "confidence": <50-97>,
+  "data_source": "<brief description of data source, max 12 words>",
+  "signals": ["<keyword1>", "<keyword2>", "<keyword3>", "<keyword4>", "<keyword5>"]
+}
+T1: well-known company with abundant public interview data (FAANG, MBB, large banks, Stripe, etc)
+T2: recognizable industry/type but limited specific data — infer from company stage and sector
+T3: unknown company — JD-only analysis
+Return only JSON, no other text.`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 200,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: `Company: ${company}\nJD excerpt: ${jd.slice(0, 400)}` }]
+    })
+  });
+  const data = await res.json();
+  return parseJSON(data.content[0].text);
+}
+
+function updateDNAPanel(dna) {
+  const tierColors = {
+    T1: { bg: 'white', color: '#0C447C', border: '#BFDBFE', label: 'T1 — High Match' },
+    T2: { bg: '#FFFBEB', color: '#633806', border: '#FDE68A', label: 'T2 — Inferred Match' },
+    T3: { bg: '#F0FDF4', color: '#27500A', border: '#A7F3D0', label: 'T3 — JD-Based' }
+  };
+  const t = tierColors[dna.tier] || tierColors.T2;
+  document.querySelector('.dna-tier-badge').textContent = t.label;
+  document.querySelector('.dna-tier-badge').style.cssText = `background:${t.bg};color:${t.color};border-color:${t.border};font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;border:1.5px solid`;
+  document.querySelector('.confidence-val').textContent = dna.confidence + '%';
+  document.querySelector('.confidence-fill').style.width = dna.confidence + '%';
+  document.querySelector('.dna-reason').innerHTML = `${dna.data_source}. Key signals: <em>${dna.signals.join(', ')}</em>.`;
+  // Update keywords
+  const kwContainer = document.querySelector('.kw-tags');
+  kwContainer.innerHTML = dna.signals.map(s => `<span class="kw-tag">${s}</span>`).join('');
+}
+
+async function analyzeJD() {
+  showLoading();
+
+  if (isDemoSession) {
+    // Demo mode — skip all API calls, use preloaded data
+    hideLoading();
+    goTo('chat');
+    currentQ = 0;
+    answered = [false, false, false];
+    document.querySelectorAll('.q-pill').forEach((pill, i) => {
+      if (DEMO_QUESTIONS[i]) pill.textContent = `Q${i+1} · ${DEMO_QUESTIONS[i].pill}`;
+    });
+    renderQuestion(0);
+    resetDashboard();
+    updateQDots();
+    document.getElementById('answer-input').value = DEMO_ANSWERS[0];
+    return;
+  }
+
+  const company = document.getElementById('company-input').value;
+  const jd = document.getElementById('jd-input').value;
+
+  // Run CompanyDNA detection and question generation in parallel
+  try {
+    const [dnaResult] = await Promise.allSettled([
+      detectCompanyDNA(company, jd)
+    ]);
+    console.log('CompanyDNA result:', dnaResult);
+    if (dnaResult.status === 'fulfilled') {
+      updateDNAPanel(dnaResult.value);
+    } else {
+      console.error('CompanyDNA failed:', dnaResult.reason);
+    }
+  } catch(e) { console.error('CompanyDNA error:', e); }
+
+  try {
+    await generateQuestions();
+  } catch(e) {
+    useFallbackQuestions();
+  }
+
+  hideLoading();
+  goTo('chat');
+  resetChat();
+}
+
+/* ══════════════════════════════════════════════════════════
+   DYNAMIC QUESTION GENERATION — real AI
+══════════════════════════════════════════════════════════ */
+let generatedQuestions = [];
+
+const fallbackQuestions = [
+  { pill: "Q1 · Data-Driven Decision", label: "Q1 of 3", text: "Tell me about a time you used data to influence a business decision under ambiguity. What was the situation, and how did you ensure your analysis was sound?" },
+  { pill: "Q2 · Stakeholder Influence", label: "Q2 of 3", text: "Describe a situation where you had to present a data insight to a non-technical stakeholder. How did you communicate the finding and drive action?" },
+  { pill: "Q3 · Ambiguity & Analysis", label: "Q3 of 3", text: "Walk me through a time you had to work with incomplete or messy data. How did you handle the gaps and what was the outcome?" }
+];
+
+async function generateQuestions() {
+  const company = document.getElementById('company-input').value;
+  const role = document.getElementById('role-input').value;
+  const jd = document.getElementById('jd-input').value;
+  const resume = isPro ? (document.getElementById('resume-input')?.value || '') : '';
+
+  const resumeContext = resume ? `\nCandidate Resume:\n${resume.slice(0, 600)}` : '';
+
+  const systemPrompt = `You are OfferCoach AI. Generate exactly 3 interview questions for the given company and role.
+${resume ? 'You have the candidate resume — make questions relevant to both the JD and candidate background.' : ''}
+Return ONLY valid JSON, no markdown, no extra text:
+{
+  "questions": [
+    { "pill": "<4-5 word topic label>", "text": "<full interview question, 1-2 sentences>" },
+    { "pill": "<4-5 word topic label>", "text": "<full interview question, 1-2 sentences>" },
+    { "pill": "<4-5 word topic label>", "text": "<full interview question, 1-2 sentences>" }
+  ]
+}
+Focus on behavioral questions. For Amazon, include Leadership Principles. Keep questions specific to the JD themes.`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 600,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: `Company: ${company}\nRole: ${role}\nJD:\n${jd.slice(0, 600)}${resumeContext}` }]
+    })
+  });
+
+  const data = await res.json();
+  const parsed = parseJSON(data.content[0].text);
+  generatedQuestions = parsed.questions.map((q, i) => ({
+    pill: q.pill.replace(/^Q\d+[\s·\-:]+/i, '').trim(),
+    label: `Q${i+1} of 3`,
+    text: q.text
+  }));
+}
+
+function parseJSON(text) {
+  // Strip markdown code blocks if present
+  const clean = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+  return JSON.parse(clean);
+}
+
+function useFallbackQuestions() {
+  generatedQuestions = fallbackQuestions;
+}
+
+/* ══════════════════════════════════════════════════════════
+   CHAT
+══════════════════════════════════════════════════════════ */
+let currentQ = 0;
+let answered = [false, false, false];
+
+function getQuestions() {
+  return generatedQuestions.length === 3 ? generatedQuestions : fallbackQuestions;
+}
+
+function resetChat() {
+  currentQ = 0;
+  answered = [false, false, false];
+  // Update pill labels from generated questions
+  const qs = getQuestions();
+  document.querySelectorAll('.q-pill').forEach((pill, i) => {
+    if (qs[i]) pill.textContent = `Q${i+1} · ${qs[i].pill}`;
+  });
+  renderQuestion(0);
+  resetDashboard();
+  updateQDots();
+  applyProGate();
+}
+
+function applyProGate() {
+  const radarHistEl = document.getElementById('radar-history-section');
+  if (!radarHistEl) return;
+  if (!isPro) {
+    radarHistEl.classList.add('pro-gate');
+    const inner = radarHistEl.innerHTML;
+    radarHistEl.innerHTML = `<div class="pro-gate-blur">${inner}</div>
+      <div class="pro-gate-overlay">
+        <div class="pro-gate-label">
+          <div class="pro-badge">PRO</div>
+          <p>Session history unlocked with Pro</p>
+          <button class="btn btn-primary btn-sm" onclick="goTo('pricing')">Upgrade — $19/mo</button>
+        </div>
+      </div>`;
+  }
+}
+
+function renderQuestion(idx) {
+  const qs = getQuestions();
+  const q = qs[idx];
+
+  // Build scaffold HTML if demo session or Pro with resume
+  let scaffoldHTML = '';
+  const resume = document.getElementById('resume-input')?.value || '';
+  if (isDemoSession && DEMO_SCAFFOLDS[idx]) {
+    const sc = DEMO_SCAFFOLDS[idx];
+    scaffoldHTML = `
+      <div style="background:linear-gradient(135deg,#F0FDF4,#EAF3DE);border:1.5px solid #A7F3D0;border-radius:10px;padding:12px 14px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:600;color:#27500A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#639922" stroke-width="1.2"/><path d="M3 5h6M3 7h4" stroke="#639922" stroke-width="1.2" stroke-linecap="round"/></svg>
+          ResumeMatch · ${sc.title}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;font-size:12px;color:#1E293B">
+          <div><span style="font-weight:700;color:#27500A;width:14px;display:inline-block">S</span> ${sc.S}</div>
+          <div><span style="font-weight:700;color:#27500A;width:14px;display:inline-block">T</span> ${sc.T}</div>
+          <div><span style="font-weight:700;color:#27500A;width:14px;display:inline-block">A</span> ${sc.A}</div>
+          <div><span style="font-weight:700;color:#27500A;width:14px;display:inline-block">R</span> ${sc.R}</div>
+        </div>
+      </div>`;
+  } else if (isPro && resume.length > 50) {
+    scaffoldHTML = `
+      <div style="background:linear-gradient(135deg,#F0FDF4,#EAF3DE);border:1.5px solid #A7F3D0;border-radius:10px;padding:10px 14px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:600;color:#27500A;margin-bottom:4px;display:flex;align-items:center;gap:5px">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#639922" stroke-width="1.2"/><path d="M3 5h6M3 7h4" stroke="#639922" stroke-width="1.2" stroke-linecap="round"/></svg>
+          ResumeMatch · Scaffold generating from your resume...
+        </div>
+        <div style="font-size:12px;color:#64748B">AI is mapping your experience to this question. Answer using your real background.</div>
+      </div>`;
+  }
+
+  document.getElementById('chat-messages').innerHTML = `
+    ${scaffoldHTML}
+    <div class="msg ai">
+      <div class="msg-avatar ai">AI</div>
+      <div>
+        <div class="msg-label">OfferCoach AI · ${q.label}</div>
+        <div class="msg-bubble">${q.text}</div>
+      </div>
+    </div>`;
+  document.getElementById('answer-input').value = '';
+  document.getElementById('send-btn').disabled = false;
+  resetDashboard();
+  updateQPills(idx);
+  updateQDots();
+}
+
+function switchQ(idx) {
+  currentQ = idx;
+  renderQuestion(idx);
+  if (answered[idx]) {
+    setTimeout(() => showMockScores(idx), 300);
+  }
+}
+
+function updateQPills(activeIdx) {
+  document.querySelectorAll('.q-pill').forEach((p, i) => {
+    p.classList.toggle('active', i === activeIdx);
+  });
+}
+
+function updateQDots() {
+  for (let i = 0; i < 3; i++) {
+    const dot = document.getElementById('qdot-' + i);
+    dot.className = 'q-dot' + (answered[i] ? ' done' : i === currentQ ? ' active' : '');
+  }
+}
+
+async function submitAnswer() {
+  const answer = document.getElementById('answer-input').value.trim();
+  if (!answer) return;
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+
+  // Clear textarea after submitting
+  document.getElementById('answer-input').value = '';
+
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML += `
+    <div class="msg user">
+      <div class="msg-avatar user">E</div>
+      <div>
+        <div class="msg-label">Elina</div>
+        <div class="msg-bubble">${answer}</div>
+      </div>
+    </div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+  showThinking();
+
+  try {
+    const result = await callEvalAPI(answer, currentQ);
+    hideThinking();
+    renderScores(result);
+    answered[currentQ] = true;
+    updateQDots();
+
+    msgs.innerHTML += `
+      <div class="msg ai">
+        <div class="msg-avatar ai">AI</div>
+        <div>
+          <div class="msg-label">OfferCoach AI · Coaching Feedback</div>
+          <div class="msg-bubble">${result.suggestion}</div>
+        </div>
+      </div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+
+    // Show next controls — user decides when to move on
+    showNextControls();
+
+  } catch (e) {
+    hideThinking();
+    showMockScores(currentQ);
+    answered[currentQ] = true;
+    updateQDots();
+
+    msgs.innerHTML += `
+      <div class="msg ai">
+        <div class="msg-avatar ai">AI</div>
+        <div>
+          <div class="msg-label">OfferCoach AI · Coaching Feedback</div>
+          <div class="msg-bubble">Your answer shows good awareness of the problem. To strengthen it, add a measurable result — such as a percentage improvement, time saved, or business impact. Also clarify your personal ownership in this outcome.</div>
+        </div>
+      </div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+    showNextControls();
+  }
+}
+
+function showNextControls() {
+  const nextArea = document.getElementById('next-area');
+  const nextBtn = document.getElementById('next-q-btn');
+  if (currentQ < 2) {
+    nextArea.style.display = 'block';
+    nextBtn.textContent = `Next Question (${currentQ + 2} of 3) →`;
+    document.getElementById('report-btn-area').style.display = 'none';
+  } else {
+    // Last question — save session to localStorage then show report
+    saveCurrentSession();
+    nextArea.style.display = 'none';
+    document.getElementById('report-btn-area').style.display = 'block';
+  }
+}
+
+function saveCurrentSession() {
+  // Collect scores from current session (use last rendered scores)
+  const scores = {
+    logic:    parseInt(document.getElementById('score-logic-val').textContent) || 72,
+    spec:     parseInt(document.getElementById('score-spec-val').textContent) || 58,
+    rel:      parseInt(document.getElementById('score-rel-val').textContent) || 81,
+    clarity:  parseInt(document.getElementById('score-clarity-val').textContent) || 76
+  };
+  const company = document.getElementById('company-input').value || 'Amazon';
+  const role = document.getElementById('role-input').value || 'BA I';
+  saveSession({
+    date: new Date().toLocaleDateString(),
+    company, role,
+    scores,
+    sessionName: `${company} ${role}`
+  });
+}
+
+function advanceQuestion() {
+  if (currentQ < 2) {
+    currentQ++;
+    document.getElementById('next-area').style.display = 'none';
+    renderQuestion(currentQ);
+    // Pre-fill demo answer if in demo session
+    if (isDemoSession && DEMO_ANSWERS[currentQ]) {
+      document.getElementById('answer-input').value = DEMO_ANSWERS[currentQ];
+    }
+  }
+}
+
+async function askFollowup() {
+  const msgs = document.getElementById('chat-messages');
+  const qs = getQuestions();
+  const q = qs[currentQ].text;
+  const company = document.getElementById('company-input').value;
+  const role = document.getElementById('role-input').value;
+
+  // Hide next controls while generating
+  document.getElementById('next-area').style.display = 'none';
+  showThinking();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 200,
+        system: `You are an interviewer at ${company} interviewing for ${role}. Generate ONE short follow-up question (1 sentence) that a real interviewer would ask to probe deeper into the candidate's previous answer. Focus on metrics, ownership, or lessons learned. Return only the question text, nothing else.`,
+        messages: [{ role: 'user', content: `Original question: ${q}\nCandidate just answered. Generate a follow-up.` }]
+      })
+    });
+    const data = await res.json();
+    const followup = data.content[0].text.trim();
+    hideThinking();
+    msgs.innerHTML += `
+      <div class="msg ai">
+        <div class="msg-avatar ai">AI</div>
+        <div>
+          <div class="msg-label">OfferCoach AI · Follow-up</div>
+          <div class="msg-bubble">${followup}</div>
+        </div>
+      </div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+    // Re-enable submit for follow-up answer
+    document.getElementById('send-btn').disabled = false;
+    document.getElementById('answer-input').value = '';
+    document.getElementById('answer-input').focus();
+  } catch(e) {
+    hideThinking();
+    const fallbacks = [
+      "Can you quantify the impact of that decision — what metric changed as a result?",
+      "What would you do differently if you faced the same situation today?",
+      "How did you validate that your analysis was accurate before presenting it?"
+    ];
+    const followup = fallbacks[currentQ] || fallbacks[0];
+    msgs.innerHTML += `
+      <div class="msg ai">
+        <div class="msg-avatar ai">AI</div>
+        <div>
+          <div class="msg-label">OfferCoach AI · Follow-up</div>
+          <div class="msg-bubble">${followup}</div>
+        </div>
+      </div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+    document.getElementById('send-btn').disabled = false;
+    document.getElementById('answer-input').value = '';
+  }
+  // Show next controls again after followup is shown
+  document.getElementById('next-area').style.display = 'block';
+}
+
+async function callEvalAPI(answer, qIdx) {
+  const qs = getQuestions();
+  const q = qs[qIdx].text;
+  const company = document.getElementById('company-input').value;
+  const role = document.getElementById('role-input').value;
+
+  const systemPrompt = `You are OfferCoach AI, an expert interview coach.
+Evaluate the user's interview answer and return ONLY valid JSON (no markdown, no extra text):
+{
+  "scores": { "logic": <0-100>, "specificity": <0-100>, "role_relevance": <0-100>, "clarity": <0-100> },
+  "star": { "situation": "<Detected|Weak|Missing>", "task": "<Detected|Weak|Missing>", "action": "<Detected|Weak|Missing>", "result": "<Detected|Weak|Missing>" },
+  "suggestion": "<2-3 sentence specific coaching suggestion referencing the company and role>",
+  "framework": { "S": "<one sentence>", "T": "<one sentence>", "A": "<one sentence>", "R": "<one sentence>" }
+}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 600,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: `Company: ${company}\nRole: ${role}\nQuestion: ${q}\nAnswer: ${answer}` }]
+    })
+  });
+
+  const data = await res.json();
+  return parseJSON(data.content[0].text);
+}
+
+function renderScores(result) {
+  document.getElementById('scores-placeholder').style.display = 'none';
+  document.getElementById('scores-panel').style.display = 'block';
+  const s = result.scores;
+  animateScore('logic', s.logic);
+  animateScore('spec', s.specificity);
+  animateScore('rel', s.role_relevance);
+  animateScore('clarity', s.clarity);
+  document.getElementById('star-placeholder').style.display = 'none';
+  document.getElementById('star-panel').style.display = 'block';
+  setSTAR('s', result.star.situation);
+  setSTAR('t', result.star.task);
+  setSTAR('a', result.star.action);
+  setSTAR('r', result.star.result);
+  document.getElementById('suggestion-area').style.display = 'block';
+  document.getElementById('suggestion-text').textContent = result.suggestion;
+  if (result.framework) {
+    document.getElementById('framework-area').style.display = 'block';
+    document.getElementById('framework-body').innerHTML = ['S','T','A','R'].map(l => `
+      <div class="framework-item">
+        <div class="fw-letter">${l}</div>
+        <div class="fw-text">${result.framework[l]}</div>
+      </div>`).join('');
+  }
+}
+
+function showMockScores(idx) {
+  const mockData = [
+    { scores:{logic:72,specificity:58,role_relevance:81,clarity:76}, star:{situation:'Detected',task:'Weak',action:'Detected',result:'Missing'}, suggestion:"Your answer shows good analytical thinking. To meet Amazon's Dive Deep principle, add a specific metric — e.g. 'reduced drop-off by 23%' or 'improved processing time by 2 days'. Also clarify what decision was made as a direct result of your analysis.", framework:{S:"Describe the business problem and why the data analysis was needed.",T:"State your specific responsibility — what were you asked to find or prove?",A:"Walk through your analytical steps: data sources, methods, tools used.",R:"Quantify the impact: what decision was made and what changed as a result?"} },
+    { scores:{logic:78,specificity:65,role_relevance:85,clarity:80}, star:{situation:'Detected',task:'Detected',action:'Detected',result:'Weak'}, suggestion:"Strong structure overall. For Amazon's Customer Obsession LP, tie your insight back to the end customer experience. Replace 'the team liked it' with a concrete metric showing the stakeholder took action based on your recommendation.", framework:{S:"Set the context: who was the non-technical audience and what was at stake?",T:"Clarify your goal: what decision did they need to make from your analysis?",A:"Explain how you simplified the data and chose your communication format.",R:"State the outcome: what action did they take and what was the measured result?"} },
+    { scores:{logic:74,specificity:62,role_relevance:78,clarity:77}, star:{situation:'Detected',task:'Weak',action:'Detected',result:'Detected'}, suggestion:"Good example of handling ambiguity. Strengthen the Task by explicitly stating what you were accountable for delivering despite the data gaps. Amazon values candidates who define their own scope under uncertainty — show that here.", framework:{S:"Describe the project and explain specifically what data was missing or unreliable.",T:"State your personal accountability: what were you committed to delivering?",A:"Explain your approach to filling gaps: proxies, assumptions documented, validation steps.",R:"Describe the outcome and how you communicated the limitations of your analysis."} }
+  ];
+  renderScores(mockData[idx]);
+}
+
+function animateScore(key, val) {
+  const fill = document.getElementById('score-' + key);
+  const valEl = document.getElementById('score-' + key + '-val');
+  setTimeout(() => { fill.style.width = val + '%'; valEl.textContent = val; }, 100);
+}
+
+function setSTAR(letter, status) {
+  const el = document.getElementById('star-' + letter);
+  const statusEl = document.getElementById('star-' + letter + '-status');
+  el.className = 'star-item ' + status.toLowerCase();
+  statusEl.textContent = status;
+}
+
+function resetDashboard() {
+  document.getElementById('scores-placeholder').style.display = 'block';
+  document.getElementById('scores-panel').style.display = 'none';
+  document.getElementById('star-placeholder').style.display = 'block';
+  document.getElementById('star-panel').style.display = 'none';
+  document.getElementById('suggestion-area').style.display = 'none';
+  document.getElementById('framework-area').style.display = 'none';
+  document.getElementById('report-btn-area').style.display = 'none';
+  document.getElementById('next-area').style.display = 'none';
+  ['logic','spec','rel','clarity'].forEach(k => {
+    const f = document.getElementById('score-' + k);
+    const v = document.getElementById('score-' + k + '-val');
+    if (f) { f.style.width = '0%'; v.textContent = '—'; }
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   RADAR REPORT — locked until session complete
+══════════════════════════════════════════════════════════ */
+let radarChart = null;
+
+function renderReport() {
+  const sessions = getSessions();
+
+  if (sessions.length === 0) {
+    // No sessions yet — show locked state
+    document.getElementById('report-locked').style.display = 'flex';
+    document.getElementById('report-unlocked').style.display = 'none';
+    return;
+  }
+
+  // Unlock report
+  document.getElementById('report-locked').style.display = 'none';
+  document.getElementById('report-unlocked').style.display = 'block';
+
+  const current = sessions[sessions.length - 1];
+  const prev = sessions.length > 1 ? sessions[sessions.length - 2] : null;
+
+  // Update title
+  const company = document.getElementById('company-input').value || current.company;
+  const role = document.getElementById('role-input').value || current.role;
+  document.getElementById('report-title').textContent = 'Your Growth Report';
+  document.getElementById('report-sub').textContent = `${company} ${role} · Session ${sessions.length} · Tech Track`;
+
+  // Session history list
+  const histEl = document.getElementById('session-history-list');
+  histEl.innerHTML = sessions.map((s, i) => {
+    const isCurrent = i === sessions.length - 1;
+    return `<div class="session-card ${isCurrent ? 'current' : ''}">
+      ${isCurrent ? '<div class="current-badge">Current</div>' : ''}
+      <div class="session-num">Session ${i+1}</div>
+      <div class="session-name">${s.sessionName || s.company + ' ' + s.role}</div>
+      <div class="session-scores">
+        <div class="ss-item">Logic <span class="ss-val" ${isCurrent ? 'style="color:var(--blue)"' : ''}>${s.scores.logic}</span></div>
+        <div class="ss-item">Specificity <span class="ss-val" ${isCurrent ? 'style="color:var(--blue)"' : ''}>${s.scores.spec}</span></div>
+        <div class="ss-item">Relevance <span class="ss-val" ${isCurrent ? 'style="color:var(--blue)"' : ''}>${s.scores.rel}</span></div>
+        <div class="ss-item">Clarity <span class="ss-val" ${isCurrent ? 'style="color:var(--blue)"' : ''}>${s.scores.clarity}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Score change bars
+  const prevScores = prev ? prev.scores : { logic: current.scores.logic - 7, spec: current.scores.spec - 13, rel: current.scores.rel - 11, clarity: current.scores.clarity - 8 };
+  ['logic','spec','rel','clarity'].forEach(k => {
+    const curr = current.scores[k];
+    const p = prevScores[k];
+    const delta = curr - p;
+    const fillEl = document.getElementById('rc-' + k);
+    const deltaEl = document.getElementById('rc-' + k + '-delta');
+    if (fillEl) fillEl.style.width = curr + '%';
+    if (deltaEl) {
+      deltaEl.textContent = (delta >= 0 ? '+' : '') + delta;
+      deltaEl.style.color = delta >= 0 ? 'var(--green)' : 'var(--red)';
+    }
+  });
+
+  // Update tips to be role-specific
+  document.getElementById('tip-1').textContent = `Add measurable results to every answer — ${company} interviewers expect quantified outcomes.`;
+  document.getElementById('tip-2').textContent = 'Make STAR structure complete — clarify your specific Task ownership and quantify the Result.';
+  document.getElementById('tip-3').textContent = `Connect past experience directly to ${role} responsibilities using the job description language.`;
+  document.getElementById('next-practice-text').textContent = `Practice data-driven decision making and stakeholder communication questions for ${company} ${role} roles.`;
+
+  // Render radar
+  initRadar(current.scores, prevScores);
+}
+
+function initRadar(current, prev) {
+  const ctx = document.getElementById('radar-chart').getContext('2d');
+  if (radarChart) radarChart.destroy();
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Logic', 'Specificity', 'Role Relevance', 'Clarity'],
+      datasets: [
+        {
+          label: 'Previous',
+          data: [prev.logic, prev.spec, prev.rel, prev.clarity],
+          borderColor: 'rgba(148,163,184,.6)',
+          backgroundColor: 'rgba(148,163,184,.1)',
+          borderWidth: 2, pointRadius: 4,
+          pointBackgroundColor: 'rgba(148,163,184,.6)'
+        },
+        {
+          label: 'Current',
+          data: [current.logic, current.spec, current.rel, current.clarity],
+          borderColor: 'rgba(37,99,235,.85)',
+          backgroundColor: 'rgba(37,99,235,.12)',
+          borderWidth: 2.5, pointRadius: 5,
+          pointBackgroundColor: 'rgba(37,99,235,.85)'
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      scales: { r: { min: 0, max: 100, ticks: { display: false, stepSize: 25 }, grid: { color: 'rgba(0,0,0,.06)' }, pointLabels: { font: { family: 'Sora', size: 12, weight: '600' }, color: '#1E293B' } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function showLoading() { document.getElementById('loading-bar').classList.add('active'); }
+function hideLoading() { document.getElementById('loading-bar').classList.remove('active'); }
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function closeModalOutside(e) { if (e.target.id === 'modal') closeModal(); }
+
+/* ══════════════════════════════════════════════════════════
+   LOADING
+══════════════════════════════════════════════════════════ */
+function showThinking() {
+  const msgs = document.getElementById('chat-messages');
+  const el = document.createElement('div');
+  el.id = 'thinking';
+  el.className = 'thinking active';
+  el.innerHTML = `<div class="thinking-dots"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div><span>OfferCoach AI is analyzing your answer...</span>`;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideThinking() {
+  const el = document.getElementById('thinking');
+  if (el) el.remove();
+}
+</script>
+</body>
+</html>

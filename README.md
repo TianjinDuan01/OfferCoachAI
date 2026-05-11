@@ -4,7 +4,6 @@
 
 An AI-powered interview coaching platform that generates company-specific questions, evaluates answers in real time, detects STAR structure gaps, and tracks skill growth across sessions.
 
-Built with the Claude API (Anthropic).
 ---
 
 ## Demo
@@ -91,7 +90,7 @@ Built with the Claude API (Anthropic).
 | 4-dimension scoring | Claude returns structured JSON after each answer |
 | STAR detection | Claude identifies Detected / Weak / Missing |
 | Coaching suggestion | Claude generates role-specific feedback |
-| ResumeMatch scaffold (demo) | Hardcoded for demo · real resume passed to API in real mode |
+| ResumeMatch scaffold (demo) | Real resume passed to API in real mode |
 | Radar chart history | localStorage accumulates actual scores across sessions |
 | CompanyDNA data source label | Real product would use Glassdoor / Blind data partnerships |
 
@@ -99,11 +98,11 @@ Built with the Claude API (Anthropic).
 
 ## Demo scenario
 
-**User:** Elina Duan · IS & AI, Johns Hopkins (M.S.) · Math & Stats, University of Toronto (B.Sc.)  
-**Target role:** Business Analyst I · Amazon Verification Services  
+**User:** Elina Duan, IS & AI, Johns Hopkins (M.S.); Math & Stats, University of Toronto (B.Sc.)  
+**Target role:** Business Analyst I, Amazon Verification Services  
 **JD source:** [amazon.jobs/en/jobs/10376846](https://www.amazon.jobs/en/jobs/10376846) (real posting)  
-**Interview type:** Round 1 Behavioral · Amazon Leadership Principles  
-**Experience:** FinEdge Analytics (intern) · Behavioral Data Lab (RA) — fictional for demo privacy
+**Interview type:** Round 1 Behavioral, Amazon Leadership Principles  
+**Experience:** FinEdge Analytics (intern); Behavioral Data Lab (RA) — fictional for demo privacy
 
 ---
 

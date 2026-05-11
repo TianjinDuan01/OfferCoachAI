@@ -9,7 +9,7 @@ Built with the Claude API (Anthropic).
 
 ## Demo
 
-**Live:** [GitHub Pages link here]
+**Live:** [\[GitHub Pages link here\]](https://TianjianDuan01.github.io/offercoach-ai/)
 
 **Or run locally:** download `index.html` and open in any browser — no installation required.
 

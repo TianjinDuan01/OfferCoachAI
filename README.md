@@ -9,7 +9,7 @@ Built with the Claude API (Anthropic).
 
 ## Demo
 
-**Live:** [\[GitHub Pages link here\]](https://TianjianDuan01.github.io/offercoach-ai/)
+**Live:** [\[GitHub Pages link here\]](https://github.com/TianjinDuan01/OfferCoachAI)
 
 **Or run locally:** download `index.html` and open in any browser — no installation required.
 
@@ -21,7 +21,7 @@ Built with the Claude API (Anthropic).
 |---------|-------------|
 | **CompanyDNA** | Detects T1 / T2 / T3 interview patterns from company name + JD using Claude API |
 | **Question generation** | Generates 3 role-specific behavioral questions tailored to the JD |
-| **ResumeMatch** ★ Pro | Maps your resume to each question and builds a personalized STAR scaffold |
+| **ResumeMatch** Pro | Maps your resume to each question and builds a personalized STAR scaffold |
 | **4-dimension scoring** | Evaluates every answer across Logic, Specificity, Role Relevance, and Clarity |
 | **STAR detection** | Identifies which components (Situation / Task / Action / Result) are missing or weak |
 | **Radar growth tracking** | Saves scores across sessions in localStorage and visualizes improvement over time |
@@ -32,8 +32,8 @@ Built with the Claude API (Anthropic).
 
 | File | Purpose |
 |------|---------|
-| `index_presentation.html` | Demo version — hardcode your API key at line 1, open in browser |
-| `index_submission.html` | Submission version — prompts for API key on load, or skip to use demo mode |
+| `index_presentation.html` | Hardcode your API key at line 1, open in browser |
+| `index_submission.html` | Prompts for API key on load, or skip to use demo mode |
 
 ---
 
@@ -86,14 +86,14 @@ Built with the Claude API (Anthropic).
 
 | Component | Status |
 |-----------|--------|
-| CompanyDNA tier detection | ✅ Real — Claude judges T1/T2/T3 from company + JD |
-| Question generation | ✅ Real — Claude generates from JD + resume context |
-| 4-dimension scoring | ✅ Real — Claude returns structured JSON after each answer |
-| STAR detection | ✅ Real — Claude identifies Detected / Weak / Missing |
-| Coaching suggestion | ✅ Real — Claude generates role-specific feedback |
+| CompanyDNA tier detection | Claude judges T1/T2/T3 from company + JD |
+| Question generation | Claude generates from JD + resume context |
+| 4-dimension scoring | Claude returns structured JSON after each answer |
+| STAR detection | Claude identifies Detected / Weak / Missing |
+| Coaching suggestion | Claude generates role-specific feedback |
 | ResumeMatch scaffold (demo) | Hardcoded for demo · real resume passed to API in real mode |
-| Radar chart history | Real — localStorage accumulates actual scores across sessions |
-| CompanyDNA data source label | Mock UI label · real product would use Glassdoor / Blind data partnerships |
+| Radar chart history | localStorage accumulates actual scores across sessions |
+| CompanyDNA data source label | Real product would use Glassdoor / Blind data partnerships |
 
 ---
 
@@ -130,4 +130,4 @@ Built with the Claude API (Anthropic).
 
 ## Author
 
-Tianjin Duan
+Author: Tianjin Duan
